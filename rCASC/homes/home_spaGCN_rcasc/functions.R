@@ -80,7 +80,8 @@ clustering=function(matrixName,tissuePositionsName,imageName,use_histology,nPerm
     clustering.output <- cbind(rownames(Coordinates),mainVector,Coordinates[,1],Coordinates[,2])
     clustering.output <- silhouette(length(unique(mainVector)),clustering.output)
     colnames(clustering.output) <- c("cellName","Belonging_Cluster","xChoord","yChoord","extraScore","intraScore","neighbor","silhouetteValue")
-    write.table(clustering.output,paste(matrixName,"_clustering.output.","txt",sep=""),sep="\t", row.names = F)
+    matrixNameBis = strsplit(matrixName,".",fixed = TRUE)[[1]][1]
+    write.table(clustering.output,paste(matrixNameBis,"_clustering.output.","txt",sep=""),sep="\t", row.names = F)
     cycles <- nPerm/permAtTime
     cat(getwd())
     for(i in 1:cycles){
@@ -101,7 +102,6 @@ clustering=function(matrixName,tissuePositionsName,imageName,use_histology,nPerm
     cluster_p <- sapply(list.files("./Permutation/",pattern="cluster*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
     killedC <- sapply(list.files("./Permutation/",pattern="killC*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
 
-    matrixNameBis = strsplit(matrixName,".",fixed = TRUE)[[1]][1]
     write.table(as.matrix(cluster_p,col.names=1),paste(matrixNameBis,"_",nCluster,"_clusterP.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
     write.table(as.matrix(killedC,col.names=1),paste(matrixNameBis,"_",nCluster,"_killedCell.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
 
