@@ -101,8 +101,9 @@ clustering=function(matrixName,tissuePositionsName,imageName,use_histology,nPerm
     cluster_p <- sapply(list.files("./Permutation/",pattern="cluster*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
     killedC <- sapply(list.files("./Permutation/",pattern="killC*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
 
-    write.table(as.matrix(cluster_p,col.names=1),paste(matrixName,"_",nCluster,"_clusterP.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
-    write.table(as.matrix(killedC,col.names=1),paste(matrixName,"_",nCluster,"_killedCell.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
+    matrixNameBis = strsplit(matrixName,".",fixed = TRUE)[[1]][1]
+    write.table(as.matrix(cluster_p,col.names=1),paste(matrixNameBis,"_",nCluster,"_clusterP.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
+    write.table(as.matrix(killedC,col.names=1),paste(matrixNameBis,"_",nCluster,"_killedCell.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
 
     pdf("hist.pdf")
     clusters <- apply(cluster_p,2,FUN=function(x){max(x)})

@@ -43,7 +43,7 @@ nCluster=clustering(matrixName,tissuePositionsName,imageName,use_histology,nPerm
 
 setwd("./../../../home")
 setwd(paste("./../scratch/",matrixName,"/",sep=""))
-silhouettePlot(matrixName,nCluster,"txt","\t")
+silhouettePlot(matrixNameBis,nCluster,"txt","\t")
 
   
 #dir.create("./../../data/Results")
