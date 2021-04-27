@@ -24,9 +24,9 @@ source("./../../../home/functions.R")
 countMatrix = Read10X_h5(paste("/scratch/",matrixName,sep=""))
 killedCellFile = "/scratch/killedCell.txt"
 killedCell <- sample(ncol(countMatrix),(ncol(countMatrix)*percent/100))
-killedCell = sort(killedCell)
-killedCell = colnames(countMatrix)[killedCell]
-write.table(killedCell,killedCellFile,quote = FALSE,row.names = FALSE,col.names = FALSE)
+killedCellNames = sort(killedCell)
+killedCellNames = colnames(countMatrix)[killedCellNames]
+write.table(killedCellNames,killedCellFile,quote = FALSE,row.names = FALSE,col.names = FALSE)
 
 system("mkdir /scratch/spaGCNout")
 spaGCNout = "/scratch/spaGCNout"
