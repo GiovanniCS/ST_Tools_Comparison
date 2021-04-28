@@ -2,6 +2,7 @@ library("Seurat")
 library("argparser")
 library(dplyr)
 library(Matrix)
+library(stringi)
 
 p <- arg_parser("permutation")
 p <- add_argument(p, "percent", help="matrix count name")
@@ -22,21 +23,22 @@ percent=as.numeric(argv$percent)
 
 source("./../../../home/functions.R")
 countMatrix = Read10X_h5(paste("/scratch/",matrixName,sep=""))
-killedCellFile = "/scratch/killedCell.txt"
+suffix = stri_rand_strings(length=5,n=1)
+killedCellFile = paste("/scratch/killedCell",suffix,".txt",sep="")
 killedCell <- sample(ncol(countMatrix),(ncol(countMatrix)*percent/100))
 killedCellNames = sort(killedCell)
 killedCellNames = colnames(countMatrix)[killedCellNames]
 write.table(killedCellNames,killedCellFile,quote = FALSE,row.names = FALSE,col.names = FALSE)
 
-system("mkdir /scratch/spaGCNout")
-spaGCNout = "/scratch/spaGCNout"
+spaGCNout = paste("/scratch/spaGCNout",suffix,sep="")
+system(paste("mkdir ",spaGCNout,sep=""))
 matrixFile = paste("/scratch/",matrixName,sep = "")
 tissuePositionsFile = paste("/scratch/",tissuePositionsName,sep = "")
 imageFile = paste("/scratch/",imageName,sep = "")
 runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," yes ",
     matrixFile," ",tissuePositionsFile," ",imageFile," ",killedCellFile,sep = "")
 system(runSpaGNC)
-mainVector = read.table("/scratch/spaGCNout/Clusters.txt",header=TRUE,row.names=1)
+mainVector = read.table(paste(spaGCNout,"/Clusters.txt",header=TRUE,row.names=1)
 clustering.output <- mainVector
 
 write.table(mainVector,paste("./Permutation/clusterB_",index,".","txt",sep=""),sep="\t")
