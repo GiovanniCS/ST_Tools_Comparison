@@ -38,7 +38,7 @@ imageFile = paste("/scratch/",imageName,sep = "")
 runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," yes ",
     matrixFile," ",tissuePositionsFile," ",imageFile," ",killedCellFile,sep = "")
 system(runSpaGNC)
-mainVector = read.table(paste(spaGCNout,"/Clusters.txt",header=TRUE,row.names=1)
+mainVector = read.table(paste(spaGCNout,"/Clusters.txt",sep=""),header=TRUE,row.names=1)
 clustering.output <- mainVector
 
 write.table(mainVector,paste("./Permutation/clusterB_",index,".","txt",sep=""),sep="\t")
