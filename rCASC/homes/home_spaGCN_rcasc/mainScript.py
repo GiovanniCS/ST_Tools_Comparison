@@ -102,7 +102,7 @@ sc.pp.log1p(adata)
 # Set percentage of total expression contributed by neighborhoods
 p=0.5
 # Search l 
-l=spg.find_l(p=p,adj=adj,start=0.5, end=1.5,sep=0.01, tol=0.02)
+l=spg.find_l(p=p,adj=adj,start=0.1, end=1.5,sep=0.01, tol=0.02)
 
 # Define the GCN 
 res=0.8
