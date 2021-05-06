@@ -12,6 +12,7 @@ p <- add_argument(p, "matrixName", help="matrix count name")
 p <- add_argument(p, "tissuePositionsName", help="matrix count name")
 p <- add_argument(p, "imageName", help="matrix count name")
 p <- add_argument(p, "use_histology", help="bool, use histological info or not")
+p <- add_argument(p, "p", help="real, percentage of total expression contributed by neighborhoods")
 p <- add_argument(p, "nPerm", help="Permutation number for bootstrap algorithm ")
 p <- add_argument(p, "permAtTime", help="Number of permutation in parallel")
 p <- add_argument(p, "percent", help="Percentage of cell removed for bootstrap algorithm ")
@@ -27,6 +28,7 @@ matrixName=argv$matrixName
 tissuePositionsName=argv$tissuePositionsName
 imageName=argv$imageName
 use_histology=argv$use_histology
+p=argv$p
 nPerm=as.numeric(argv$nPerm)
 permAtTime=as.numeric(argv$permAtTime)
 percent=as.numeric(argv$percent)
@@ -38,7 +40,7 @@ dir.create(paste("./../scratch/",matrixNameBis,sep=""))
 
 
 setwd(paste("./../scratch/",matrixNameBis,"/",sep=""))
-nCluster=clustering(matrixName,tissuePositionsName,imageName,use_histology,nPerm,permAtTime,percent,nCluster=0)
+nCluster=clustering(matrixName,tissuePositionsName,imageName,use_histology,p,nPerm,permAtTime,percent,nCluster=0)
 
 
 setwd("./../../../home")

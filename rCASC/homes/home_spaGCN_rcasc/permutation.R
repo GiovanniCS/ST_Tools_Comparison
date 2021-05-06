@@ -10,6 +10,7 @@ p <- add_argument(p, "matrixName", help="Percentage of cell removed for bootstra
 p <- add_argument(p, "tissuePositionsName", help="file with spot coordinates")
 p <- add_argument(p, "imageName", help="parameter of minkowski distance bw transcriptional profiles")
 p <- add_argument(p, "use_histology", help="parameter of minkowski distance bw spot position")
+p <- add_argument(p, "p", help="real, percentage of total expression contributed by neighborhoods")
 p <- add_argument(p, "index", help="Clulstering method: SIMLR tSne Griph")
 
 argv <- parse_args(p)
@@ -18,6 +19,7 @@ matrixName=argv$matrixName
 tissuePositionsName=argv$tissuePositionsName
 imageName=argv$imageName
 use_histology=argv$use_histology
+p=argv$p
 index=argv$index
 percent=as.numeric(argv$percent)
 
@@ -36,7 +38,7 @@ matrixFile = paste("/scratch/",matrixName,sep = "")
 tissuePositionsFile = paste("/scratch/",tissuePositionsName,sep = "")
 imageFile = paste("/scratch/",imageName,sep = "")
 runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," yes ",
-    matrixFile," ",tissuePositionsFile," ",imageFile," ",killedCellFile,sep = "")
+    matrixFile," ",tissuePositionsFile," ",imageFile," ",p," ",killedCellFile,sep = "")
 system(runSpaGNC)
 mainVector = read.table(paste(spaGCNout,"/Clusters.txt",sep=""),header=TRUE,row.names=1)
 clustering.output <- mainVector

@@ -31,8 +31,9 @@ subsetting = bool(subsetting)
 matrix_path = sys.argv[4]
 spots_path = sys.argv[5]
 image_path = sys.argv[6]
+p = sys.argv[7]
 if subsetting:
-  killed_spots_path = sys.argv[7]
+  killed_spots_path = sys.argv[8]
 
 adata = read_10x_h5(matrix_path)
 spatial=pd.read_csv(spots_path,sep=",",header=None,na_filter=False,index_col=0)
@@ -100,9 +101,9 @@ sc.pp.normalize_per_cell(adata)
 sc.pp.log1p(adata)
 
 # Set percentage of total expression contributed by neighborhoods
-p=0.5
+p=float(p)
 # Search l 
-l=spg.find_l(p=p,adj=adj,start=0.1, end=1.5,sep=0.005, tol=0.02)
+l=spg.find_l(p=p,adj=adj,start=0.01, end=2,sep=0.005, tol=0.02)
 
 # Define the GCN 
 res=0.8
