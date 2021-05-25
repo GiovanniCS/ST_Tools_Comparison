@@ -54,38 +54,24 @@ silhouette=function(nCluster,clustering.output){
     return(cbind(clustering.output,extraScore,intraScore,neighbor,silhouetteValue))
 }
 
-clustering=function(matrixName,nPerm,permAtTime,percent,nCluster,logTen,format,
-    separator,pcaDimensions){
-    if(separator=="tab"){separator2="\t"}else{separator2=separator}
-    if(sparse=="FALSE"){
-        countMatrix=read.table(paste("./../",matrixName,".",format,sep=""),sep=separator2,header=TRUE,row.name=1)
-        if(logTen==1){countMatrix=10^(countMatrix)}
-    }else{
-        countMatrix <- Read10X(data.dir = "./")
-        if(logTen==1){
-            stop("Sparse Matrix in Seurat has to be raw count")
-        }
-    }
+clustering=function(matrixName,lResolution,nPerm,permAtTime,percent,nCluster,pcaDimensions){
+    countMatrix=read.table(paste("/scratch/",matrixName,sep=""),sep="\t",header=TRUE,row.name=1)
     countMatrix <- countMatrix[,sort(colnames(countMatrix))]
-
     pbmc <- CreateSeuratObject(countMatrix)
-    pbmc <- ScaleData(pbmc)
-    pbmc <- RunPCA(pbmc,features = rownames(pbmc@assays[["RNA"]]))
-    if(pcaDimensions <= 2){
-        pcaDimensions = 2
-    }
-    m <- pbmc@reductions[["pca"]]@cell.embeddings[,1:pcaDimensions]
-    distPCA = dist(m,method="minkowski",p=as.numeric(2))  
-    finalDistance <- as.matrix(distPCA)
-    neighbors <- FindNeighbors(finalDistance)
-    neighbors <- list(neighbors_nn=neighbors$nn,neighbors_snn=neighbors$snn)
-    pbmc@graphs <- neighbors
-    pbmc <- FindClusters(pbmc, verbose = FALSE, graph.name = "neighbors_snn")
+    pbmc <- SCTransform(pbmc, assay = "RNA", verbose = FALSE)
+    pbmc <- RunPCA(pbmc, assay = "SCT", verbose = FALSE)
+    pbmc.new <- RunTSNE(object = pbmc) 
+    Coordinates <- pbmc.new@reductions[["tsne"]]@cell.embeddings
 
-    pbmc.new <- RunTSNE(object = distPCA)
-    mainVector <- as.numeric(pbmc@active.ident) 
-    Coordinates <- pbmc.new@cell.embeddings
-
+    stLearnout = "/scratch/stLearnout"
+    system("mkdir /scratch/stLearnout")
+    inputDataset = "/scratch/filtered_feature_bc_matrix"
+    lResolution = lResolution
+    runstLearn = paste("python /home/mainScript.py ",inputDataset," ",stLearnout," ",pcaDimensions," ",lResolution," no ",sep = "")
+    system(runstLearn)
+    
+    mainVector = read.table("/scratch/stLearnout/Clusters.txt",header=TRUE,row.names=1)
+    mainVector = as.numeric(mainVector$Cluster) + 1
     nCluster <- max(mainVector)
     dir.create(paste("./",nCluster,sep=""))
     dir.create(paste("./",nCluster,"/Permutation",sep=""))
@@ -94,17 +80,18 @@ clustering=function(matrixName,nPerm,permAtTime,percent,nCluster,logTen,format,
     clustering.output <- cbind(rownames(Coordinates),mainVector,Coordinates[,1],Coordinates[,2])
     clustering.output <- silhouette(length(unique(mainVector)),clustering.output)
     colnames(clustering.output) <- c("cellName","Belonging_Cluster","xChoord","yChoord","extraScore","intraScore","neighbor","silhouetteValue")
-    write.table(clustering.output,paste(matrixName,"_clustering.output.",format,sep=""),sep=separator2, row.names = F)
+    matrixNameBis = strsplit(matrixName,".",fixed = TRUE)[[1]][1]
+    write.table(clustering.output,paste(matrixNameBis,"_clustering.output.","txt",sep=""),sep="\t", row.names = F)
     cycles <- nPerm/permAtTime
     cat(getwd())
     for(i in 1:cycles){
             system(paste("for X in $(seq ",permAtTime,")
         do
-        nohup Rscript ./../../../home/permutation.R ",percent," ",matrixName," ",format," ",separator," ",logTen," ",pcaDimensions," ",sparse," $(($X +",(i-1)*permAtTime," )) & 
+        nohup Rscript ./../../../home/permutation.R ",percent," ",matrixName," ",lResolution," ",pcaDimensions," $(($X +",(i-1)*permAtTime," )) & 
 
         done"))
         d=1
-        while(length(list.files("./Permutation",pattern=paste("*.",format,sep="")))!=i*permAtTime*2){
+        while(length(list.files("./Permutation",pattern=paste("*.","txt",sep="")))!=i*permAtTime*2){
             if(d==1){cat(paste("Cluster number ",nCluster," ",((permAtTime*i))/nPerm*100," % complete \n"))}
             d=2
         }
@@ -112,18 +99,18 @@ clustering=function(matrixName,nPerm,permAtTime,percent,nCluster,logTen,format,
         system("sync")
         gc()
     }
-    cluster_p <- sapply(list.files("./Permutation/",pattern="cluster*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep=separator2)[[1]]})
-    killedC <- sapply(list.files("./Permutation/",pattern="killC*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep=separator2)[[1]]})
+    cluster_p <- sapply(list.files("./Permutation/",pattern="cluster*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
+    killedC <- sapply(list.files("./Permutation/",pattern="killC*"),FUN=function(x){a=read.table(paste("./Permutation/",x,sep=""),header=TRUE,col.names=1,sep="\t")[[1]]})
 
-    write.table(as.matrix(cluster_p,col.names=1),paste(matrixName,"_",nCluster,"_clusterP.",format,sep=""),sep=separator2,row.names=FALSE, quote=FALSE)
-    write.table(as.matrix(killedC,col.names=1),paste(matrixName,"_",nCluster,"_killedCell.",format,sep=""),sep=separator2,row.names=FALSE, quote=FALSE)
+    write.table(as.matrix(cluster_p,col.names=1),paste(matrixNameBis,"_",nCluster,"_clusterP.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
+    write.table(as.matrix(killedC,col.names=1),paste(matrixNameBis,"_",nCluster,"_killedCell.","txt",sep=""),sep="\t",row.names=FALSE, quote=FALSE)
 
     pdf("hist.pdf")
     clusters <- apply(cluster_p,2,FUN=function(x){max(x)})
     hist(clusters,xlab="nCluster",breaks=length(unique(cluster_p)))
     dev.off()
 
-    write.table(sort(unique(clusters)),paste("./../rangeVector.",format,sep=""),sep=separator2,row.names=FALSE,col.names=FALSE)
+    write.table(sort(unique(clusters)),paste("./../rangeVector.","txt",sep=""),sep="\t",row.names=FALSE,col.names=FALSE)
     system("rm -r Permutation")
     return(length(unique(mainVector)))
 }

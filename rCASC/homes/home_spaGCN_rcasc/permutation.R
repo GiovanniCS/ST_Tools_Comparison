@@ -41,7 +41,7 @@ runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," y
     matrixFile," ",tissuePositionsFile," ",imageFile," ",p," ",killedCellFile,sep = "")
 system(runSpaGNC)
 mainVector = read.table(paste(spaGCNout,"/Clusters.txt",sep=""),header=TRUE,row.names=1)
-clustering.output <- mainVector
+mainVector <- mainVector + 1
 
 write.table(mainVector,paste("./Permutation/clusterB_",index,".","txt",sep=""),sep="\t")
 write.table(killedCell,paste("./Permutation/killC_",index,".","txt",sep=""),sep="\t")
