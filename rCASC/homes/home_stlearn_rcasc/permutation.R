@@ -27,6 +27,7 @@ killedCellFile = paste("/scratch/killedCell",suffix,".txt",sep="")
 killedCell <- sample(ncol(countMatrix),(ncol(countMatrix)*percent/100))
 killedCellNames = sort(killedCell)
 killedCellNames = colnames(countMatrix)[killedCellNames]
+killedCellNames = gsub("[.]","-",killedCellNames)
 write.table(killedCellNames,killedCellFile,quote = FALSE,row.names = FALSE,col.names = FALSE)
 
 stLearnout = paste("/scratch/stLearnout",suffix,sep="")
