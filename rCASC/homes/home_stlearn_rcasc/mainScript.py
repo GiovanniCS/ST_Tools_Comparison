@@ -49,4 +49,5 @@ st.pp.neighbors(data,n_neighbors=15,use_rep='X_pca')
 st.tl.clustering.louvain(data, resolution=L_resolution)
 
 clusters = data.obs['louvain']
+clusters = clusters.sort_index()
 clusters.to_csv(output_path + '/Clusters.txt',sep="\t")
