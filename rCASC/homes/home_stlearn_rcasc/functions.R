@@ -71,7 +71,7 @@ clustering=function(matrixName,lResolution,nPerm,permAtTime,percent,nCluster,pca
     system(runstLearn)
     
     mainVector = read.table("/scratch/stLearnout/Clusters.txt",header=TRUE,row.names=1)
-    mainVector = as.numeric(mainVector$Cluster) + 1
+    mainVector = as.numeric(mainVector[,1]) + 1
     nCluster <- max(mainVector)
     dir.create(paste("./",nCluster,sep=""))
     dir.create(paste("./",nCluster,"/Permutation",sep=""))
