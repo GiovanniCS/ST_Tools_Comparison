@@ -31,9 +31,11 @@ subsetting = bool(subsetting)
 matrix_path = sys.argv[4]
 spots_path = sys.argv[5]
 image_path = sys.argv[6]
-p = sys.argv[7]
+L_resolution = float(sys.argv[7])
+n_comps = int(sys.argv[8])
+p = sys.argv[9]
 if subsetting:
-  killed_spots_path = sys.argv[8]
+  killed_spots_path = sys.argv[10]
 
 adata = read_10x_h5(matrix_path)
 spatial=pd.read_csv(spots_path,sep=",",header=None,na_filter=False,index_col=0)
@@ -93,7 +95,7 @@ torch.manual_seed(200)
 np.random.seed(200)
 
 adata.var_names_make_unique()
-spg.prefilter_genes(adata,min_cells=3)
+spg.prefilter_genes(adata,min_cells=10)
 spg.prefilter_specialgenes(adata)
 
 # Normalize and take log for UMI
@@ -111,7 +113,7 @@ clf=spg.SpaGCN()
 clf.set_l(l)
 
 # Train: Init using louvain
-clf.train(adata,adj,init_spa=True,init="louvain",res=res,louvain_seed=0,tol=5e-3)
+clf.train(adata,adj,num_pcs=n_comps,init_spa=True,init="louvain",res=L_resolution,louvain_seed=0,tol=5e-3)
 
 # Predict 
 y_pred, prob=clf.predict()

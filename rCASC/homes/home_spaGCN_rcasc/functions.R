@@ -54,7 +54,7 @@ silhouette=function(nCluster,clustering.output){
     return(cbind(clustering.output,extraScore,intraScore,neighbor,silhouetteValue))
 }
 
-clustering=function(matrixName,tissuePositionsName,imageName,use_histology,p,nPerm,permAtTime,percent,nCluster){
+clustering=function(matrixName,tissuePositionsName,imageName,use_histology,lResolution,pcaDimensions,p,nPerm,permAtTime,percent,nCluster){
     countMatrix = Read10X_h5(paste("/scratch/",matrixName,sep=""))
     pbmc <- CreateSeuratObject(countMatrix)
     pbmc <- SCTransform(pbmc, assay = "RNA", verbose = FALSE)
@@ -67,7 +67,7 @@ clustering=function(matrixName,tissuePositionsName,imageName,use_histology,p,nPe
     matrixFile = paste("/scratch/",matrixName,sep = "")
     tissuePositionsFile = paste("/scratch/",tissuePositionsName,sep = "")
     imageFile = paste("/scratch/",imageName,sep = "")
-    runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," no ",matrixFile," ",tissuePositionsFile," ",imageFile," ",p,sep = "")
+    runSpaGNC = paste("python /home/mainScript.py ",spaGCNout," ", use_histology," no ",matrixFile," ",tissuePositionsFile," ",imageFile," ",lResolution," ",pcaDimensions," ",p,sep = "")
     system(runSpaGNC)
     active.ident = read.table("/scratch/spaGCNout/Clusters.txt",header=TRUE,row.names=1)
     active.ident = active.ident$Cluster
@@ -87,7 +87,7 @@ clustering=function(matrixName,tissuePositionsName,imageName,use_histology,p,nPe
     for(i in 1:cycles){
             system(paste("for X in $(seq ",permAtTime,")
         do
-        nohup Rscript ./../../../home/permutation.R ",percent," ",matrixName," ",tissuePositionsName," ",imageName," ",use_histology," ",p," "," $(($X +",(i-1)*permAtTime," )) & 
+        nohup Rscript ./../../../home/permutation.R ",percent," ",matrixName," ",tissuePositionsName," ",imageName," ",lResolution," ",pcaDimensions," ",use_histology," ",p," "," $(($X +",(i-1)*permAtTime," )) & 
 
         done"))
         d=1
