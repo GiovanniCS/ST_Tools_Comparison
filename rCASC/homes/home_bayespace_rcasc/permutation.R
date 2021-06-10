@@ -10,11 +10,13 @@ library(BayesSpace)
 p <- arg_parser("permutation")
 p <- add_argument(p, "percent", help="matrix count name")
 p <- add_argument(p, "n_clusters", help="how many clusters BayeSpace should search")
+p <- add_argument(p, "pcaDimensions", help="PCA dimension for seurat first number")
 p <- add_argument(p, "index", help="Clulstering method: SIMLR tSne Griph")
 
 argv <- parse_args(p)
 cat(system("pwd"))
 n_clusters=as.integer(argv$n_clusters)
+pcaDimensions=as.integer(argv$pcaDimensions)
 index=argv$index
 percent=as.numeric(argv$percent)
 
@@ -24,8 +26,8 @@ sce = sce[,sort(colnames(sce))]
 sce = sce[rowSums(counts(sce)) > 10,]
 killedCell <- sample(ncol(sce),(ncol(sce)*percent/100))
 sce = sce[,-killedCell]
-sce <- spatialPreprocess(sce, platform="ST", n.PCs=5, n.HVGs=2000, log.normalize=TRUE)
-sce <- spatialCluster(sce, q=n_clusters, platform="ST", d=5,
+sce <- spatialPreprocess(sce, platform="ST", n.PCs=pcaDimensions, n.HVGs=2000, log.normalize=TRUE)
+sce <- spatialCluster(sce, q=n_clusters, platform="ST", d=pcaDimensions,
                         init.method="mclust", model="t", gamma=2,
                         nrep=10000, burn.in=100,
                         save.chain=TRUE)

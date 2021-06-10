@@ -54,8 +54,10 @@ silhouette=function(nCluster,clustering.output){
     return(cbind(clustering.output,extraScore,intraScore,neighbor,silhouetteValue))
 }
 
-clustering=function(matrixName,n_clusters,nPerm,permAtTime,percent,nCluster){
+clustering=function(matrixName,n_clusters,pcaDimensions,nPerm,permAtTime,
+    percent,nCluster){
     n_clusters = as.integer(n_clusters)
+    pcaDimensions = as.integer(pcaDimensions)
     countMatrix=read.table(paste("/scratch/",matrixName,sep=""),sep="\t",header=TRUE,row.name=1)
     countMatrix <- countMatrix[,sort(colnames(countMatrix))]
     pbmc <- CreateSeuratObject(countMatrix)
@@ -67,8 +69,8 @@ clustering=function(matrixName,n_clusters,nPerm,permAtTime,percent,nCluster){
     sce <- readVisium("/scratch/")
     sce = sce[,sort(colnames(sce))]
     sce = sce[rowSums(counts(sce)) > 10,]
-    sce <- spatialPreprocess(sce, platform="ST", n.PCs=5, n.HVGs=2000, log.normalize=TRUE)
-    sce <- spatialCluster(sce, q=n_clusters, platform="ST", d=5,
+    sce <- spatialPreprocess(sce, platform="ST", n.PCs=pcaDimensions, n.HVGs=2000, log.normalize=TRUE)
+    sce <- spatialCluster(sce, q=n_clusters, platform="ST", d=pcaDimensions,
                            init.method="mclust", model="t", gamma=2,
                            nrep=10000, burn.in=100,
                            save.chain=TRUE)
@@ -92,7 +94,7 @@ clustering=function(matrixName,n_clusters,nPerm,permAtTime,percent,nCluster){
     for(i in 1:cycles){
             system(paste("for X in $(seq ",permAtTime,")
         do
-        nohup Rscript ./../../../home/permutation.R ",percent," ",n_clusters," "," $(($X +",(i-1)*permAtTime," )) & 
+        nohup Rscript ./../../../home/permutation.R ",percent," ",n_clusters," ",pcaDimensions," $(($X +",(i-1)*permAtTime," )) & 
 
         done"))
         d=1
