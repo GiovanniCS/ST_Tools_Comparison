@@ -95,6 +95,7 @@ clustering=function(matrixName,matrix.h5,positions.csv,n_clusters,pcaDimensions,
                                 spatial_network_name = 'Delaunay_network',
                                 k = n_clusters,
                                 betas = c(25,1,1),
+                                python_path="/root/miniconda3/bin/python",
                                 output_folder = paste0(hmrf_folder,'/SG_top100_scaled'))
     my_giotto_object = addHMRF(gobject = my_giotto_object,
                   HMRFoutput = HMRF_spatial_genes,
@@ -112,7 +113,11 @@ clustering=function(matrixName,matrix.h5,positions.csv,n_clusters,pcaDimensions,
 
     mainVector = my_giotto_object@cell_metadata[,5]
     mainVector = as.numeric(mainVector[[1]])
-    nCluster <- max(mainVector)
+    jumping_clusters = sort(unique(mainVector))
+    for(i in 1:length(jumping_clusters)){
+        mainVector[mainVector==jumping_clusters[i]] = i
+    }
+    nCluster <- length(unique(mainVector))
     dir.create(paste("./",nCluster,sep=""))
     dir.create(paste("./",nCluster,"/Permutation",sep=""))
     setwd(paste("./",nCluster,sep=""))

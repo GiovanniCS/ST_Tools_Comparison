@@ -58,12 +58,14 @@ HMRF_spatial_genes = doHMRF(gobject = my_giotto_object,
                             spatial_network_name = 'Delaunay_network',
                             k = n_clusters,
                             betas = c(25,1,1),
+                            python_path="/root/miniconda3/bin/python",
                             output_folder = paste0(hmrf_folder,'/SG_top100_scaled'))
 my_giotto_object = addHMRF(gobject = my_giotto_object,
                 HMRFoutput = HMRF_spatial_genes,
                 k = n_clusters, betas_to_add = c(25),
                 hmrf_name = 'HMRF')
-
+system(paste0("rm /scratch/",suffix,".h5"))
+system(paste0("rm -rf ",hmrf_folder,'/SG_top100_scaled'))
 
 png(paste0(hmrf_folder,'/',suffix,".png"))
 # visualize selected hmrf result
@@ -75,11 +77,13 @@ dev.off()
 
 mainVector = my_giotto_object@cell_metadata[,5]
 mainVector = as.numeric(mainVector[[1]])
+jumping_clusters = sort(unique(mainVector))
+for(i in 1:length(jumping_clusters)){
+    mainVector[mainVector==jumping_clusters[i]] = i
+}
 
 write.table(mainVector,paste("./Permutation/clusterB_",index,".","txt",sep=""),sep="\t")
 write.table(killedCell,paste("./Permutation/killC_",index,".","txt",sep=""),sep="\t")
 rm(list=setdiff(ls(),"index"))
 dir.create("./memory")
 system(paste("cat /proc/meminfo >  ./memory/",index,".txt",sep=""))
-system(paste0("rm /scratch/",suffix,".h5"))
-system(paste0("rm -rf ",hmrf_folder,'/SG_top100_scaled'))
