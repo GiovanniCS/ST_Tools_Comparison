@@ -36,6 +36,11 @@ png(paste('/scratch/bayespaceout/bayespace_',suffix,".png",sep=""))
 clusterPlot(sce)
 dev.off()
 mainVector = colData(sce)$spatial.cluster
+mainVector = as.numeric(mainVector)
+jumping_clusters = sort(unique(mainVector))
+for(i in 1:length(jumping_clusters)){
+    mainVector[mainVector==jumping_clusters[i]] = i
+}
 
 write.table(mainVector,paste("./Permutation/clusterB_",index,".","txt",sep=""),sep="\t")
 write.table(killedCell,paste("./Permutation/killC_",index,".","txt",sep=""),sep="\t")

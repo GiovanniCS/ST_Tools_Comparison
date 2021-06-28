@@ -79,6 +79,11 @@ clustering=function(matrixName,n_clusters,pcaDimensions,nPerm,permAtTime,
     clusterPlot(sce)
     dev.off()
     mainVector = colData(sce)$spatial.cluster
+    mainVector = as.numeric(mainVector)
+    jumping_clusters = sort(unique(mainVector))
+    for(i in 1:length(jumping_clusters)){
+        mainVector[mainVector==jumping_clusters[i]] = i
+    }
     nCluster <- max(mainVector)
     dir.create(paste("./",nCluster,sep=""))
     dir.create(paste("./",nCluster,"/Permutation",sep=""))
